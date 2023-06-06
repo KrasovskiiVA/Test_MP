@@ -185,7 +185,7 @@ function loadModel(name) {
 			if ( child.name === 'DEF-forearmR' ) OOI.rForearmBend = child;  //562
 			if ( child.name === 'DEF-forearmR001' ) OOI.rForearmTwist = child;  //563
 			if ( child.name === 'DEF-handR' ) OOI.rHand = child;  //564
-            if ( child.name === 'DEF-palm01R' ) OOI.rPalmIndex = child;  //580
+            if ( child.name === 'ORG-palm01R' ) OOI.rPalmIndex = child;  //565
             if ( child.name === 'DEF-palm02R' ) OOI.rPalmMiddle = child;  //609
             if ( child.name === 'DEF-palm03R' ) OOI.rPalmRing = child;  //628
             if ( child.name === 'DEF-palm04R' ) OOI.rPalmPinky = child;  //647
@@ -206,11 +206,11 @@ function loadModel(name) {
             if ( child.name === 'DEF-f_thumb03R' ) OOI.rThumb03 = child;  //578
             //IK bones
             if ( child.name === 'hand_ikR' ) OOI.rHandIK = child;  //674
-            if ( child.name === 'f_index01R001' ) OOI.rIndexIK = child;  //587
-            if ( child.name === 'f_middle01R001' ) OOI.rIK = child;  //616
-            if ( child.name === 'f_ring01R001' ) OOI.rIK = child;  //635
-            if ( child.name === 'f_pinky01R001' ) OOI.rIK = child;  //654
-            if ( child.name === 'thumb01R001' ) OOI.rIK = child;  //597
+            if ( child.name === 'f_index03R' ) OOI.rIndexIK = child;  //586
+            if ( child.name === 'f_middle03R' ) OOI.rMiddleIK = child;  //616
+            if ( child.name === 'f_ring03R' ) OOI.rRingIK = child;  //635
+            if ( child.name === 'f_pinky03R' ) OOI.rPinkyIK = child;  //654
+            if ( child.name === 'thumb03R' ) OOI.rThumbIK = child;  //597
             // Body
             if ( child.name === 'Body_9' ) OOI.ArmR = child;
             if (child.isMesh) {
@@ -282,41 +282,118 @@ function loadModel(name) {
         ];
         const iksIndexR = [
 			{
-				target: 587, // rIndexIK
+				target: 586, // rIndexIK
 				effector: 574, // rIndex03
 				links: [
                     {
 						index: 573, // "rIndex02"
-                        //rotationMin: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y  - ( 90 * Math.PI / 180 ), OOI.rForearmTwist.rotation._z),
-                        //rotationMax: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y  + ( 80 * Math.PI / 180 ), OOI.rForearmTwist.rotation._z)
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
 					},
 					{
 						index: 572, // "rIndex01"
-                        //rotationMin: new THREE.Vector3(OOI.rForearmBend.rotation._x - ( 20 * Math.PI / 180 ), 0, OOI.rForearmBend.rotation._z),
-                        //rotationMax: new THREE.Vector3(OOI.rForearmBend.rotation._x + ( 135 * Math.PI / 180 ), 0, OOI.rForearmBend.rotation._z)
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
 					},
+                ],
+            }
+        ];
+        const iksMiddleR = [
+			{
+				target: 616, // rMiddleIK
+				effector: 607, // rMiddle03
+				links: [
                     {
-						index: 580, // "rPalmIndex"
-                        //rotationMin: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y - ( 95 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z),
-                        //rotationMax: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y + ( 80 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z)
+						index: 606, // "rMiddle02"
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
 					},
+					{
+						index: 605, // "rMiddle01"
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
+					},
+                ],
+            }
+        ];
+        const iksRingR = [
+			{
+				target: 635, // rRingIK
+				effector: 626, // rRing03
+				links: [
                     {
-						index: 564, // "rHand"
-                        //rotationMin: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y - ( 95 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z),
-                        //rotationMax: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y + ( 80 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z)
+						index: 625, // "rRing02"
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
+					},
+					{
+						index: 624, // "rRing01"
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
+					},
+                ],
+            }
+        ];
+        const iksPinkyR = [
+			{
+				target: 654, // rPinkyIK
+				effector: 645, // rPinky03
+				links: [
+                    {
+						index: 644, // "rPinky02"
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
+					},
+					{
+						index: 643, // "rPinky01"
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
+					},
+                ],
+            }
+        ];
+        const iksThumbR = [
+			{
+				target: 597, // rThumbIK
+				effector: 578, // rThumb03
+				links: [
+                    {
+						index: 577, // "rThumb02"
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
+					},
+					{
+						index: 576, // "rThumb01"
+                        //rotationMin: new THREE.Vector3(0,0,0),
+                        //rotationMax: new THREE.Vector3(0,0,0)
 					},
                 ],
             }
         ];
 
-        /*
 		IKSolverArmR = new CCDIKSolver( OOI.ArmR, iksArmR );
 		const ccdIKHelperArmR = new CCDIKHelper( OOI.ArmR, iksArmR, 0.01 );
 		scene.add( ccdIKHelperArmR );
-*/
+
         IKSolverIndexR = new CCDIKSolver( OOI.ArmR, iksIndexR );
 		const ccdIKHelperIndexR = new CCDIKHelper( OOI.ArmR, iksIndexR, 0.01 );
 		scene.add( ccdIKHelperIndexR );
+
+        IKSolverMiddleR = new CCDIKSolver( OOI.ArmR, iksMiddleR );
+		const ccdIKHelperMiddleR = new CCDIKHelper( OOI.ArmR, iksMiddleR, 0.01 );
+		scene.add( ccdIKHelperMiddleR );
+
+        IKSolverRingR = new CCDIKSolver( OOI.ArmR, iksRingR );
+		const ccdIKHelperRingR = new CCDIKHelper( OOI.ArmR, iksRingR, 0.01 );
+		scene.add( ccdIKHelperRingR );
+
+        IKSolverPinkyR = new CCDIKSolver( OOI.ArmR, iksPinkyR );
+		const ccdIKHelperPinkyR = new CCDIKHelper( OOI.ArmR, iksPinkyR, 0.01 );
+		scene.add( ccdIKHelperPinkyR );
+
+        IKSolverThumbR = new CCDIKSolver( OOI.ArmR, iksThumbR );
+		const ccdIKHelperThumbR = new CCDIKHelper( OOI.ArmR, iksThumbR, 0.01 );
+		scene.add( ccdIKHelperThumbR );
 
         console.log(OOI.ArmR.skeleton);
 
@@ -364,6 +441,13 @@ function hideProgressBar() {
 function createPanel() {
     const gui = new GUI({title: "Hand"});
     settings = {
+        "Hand": function() { attachNewTarget(OOI.rHandIK) },
+        "Index": function() { attachNewTarget(OOI.rIndexIK) },
+        "Middle": function() { attachNewTarget(OOI.rMiddleIK) },
+        "Ring": function() { attachNewTarget(OOI.rRingIK) },
+        "Pinky": function() { attachNewTarget(OOI.rPinkyIK) },
+        "Thumb": function() { attachNewTarget(OOI.rThumbIK) },
+        "Elbow": function() { attachNewTarget(OOI.rForearmBend) },
         x: 0,
         y: 0,
         z: 0
@@ -382,8 +466,21 @@ function createPanel() {
     guiz.onChange(function (val) {
         OOI.rTargetBone.position.z = val;
     });
+    gui.add(settings, "Hand");
+    gui.add(settings, "Index");
+    gui.add(settings, "Middle");
+    gui.add(settings, "Ring");
+    gui.add(settings, "Pinky");
+    gui.add(settings, "Thumb");
+    gui.add(settings, "Elbow");
 
     gui.open();
+
+    function attachNewTarget(bone) {
+        transformControls.detach();
+        OOI.rTargetBone = bone;
+        transformControls.attach( OOI.rTargetBone );
+    }
 
 }
 
@@ -391,14 +488,14 @@ function createPanel() {
 function animate() {
     requestAnimationFrame(animate);
     camera.updateMatrixWorld();
-    //IKSolverArmR?.update();
+    IKSolverArmR?.update();
     IKSolverIndexR?.update();
-    //IKSolverMiddleR?.update();
-    //IKSolverRingR?.update();
-    //IKSolverPinkyR?.update();
-    //IKSolverThumbR?.update();
+    IKSolverMiddleR?.update();
+    IKSolverRingR?.update();
+    IKSolverPinkyR?.update();
+    IKSolverThumbR?.update();
     renderer.render(scene, camera);
-    if (typeof settings !== 'undefined') {
+    if (typeof OOI.rTargetBone !== 'undefined') {
         settings.x = OOI.rTargetBone.position.x;
         settings.y = OOI.rTargetBone.position.y;
         settings.z = OOI.rTargetBone.position.z;
