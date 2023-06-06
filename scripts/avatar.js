@@ -12,7 +12,7 @@ const container = document.createElement('div');
 const loader = new GLTFLoader();
 //const targetBone = new THREE.Bone();
 const OOI = {};
-let IKSolver;
+let IKSolverArmR, IKSolverIndexR, IKSolverMiddleR, IKSolverRingR, IKSolverPinkyR, IKSolverThumbR;
 
 let avatar, camera, t, tCam, OrbCtrl, transformControls, scene, renderer, progressBarDiv, spotLight, dirLight, buBackgroundColor, settings;
 let transitionTime = 1000;
@@ -178,14 +178,41 @@ function loadModel(name) {
     loader.load(name, function (object) {
         avatar = object.scene;
         avatar.traverse(function (child) {
-            if ( child.name === 'DEF-shoulderR' ) OOI.rCollar = child;
-			if ( child.name === 'DEF-upper_armR' ) OOI.rShldrBend = child;
-            if ( child.name === 'DEF-upper_armR001' ) OOI.rShldrTwist = child;
-			if ( child.name === 'DEF-forearmR' ) OOI.rForearmBend = child;
-			if ( child.name === 'DEF-forearmR001' ) OOI.rForearmTwist = child;
-			if ( child.name === 'DEF-handR' ) OOI.rHand = child;
-            if ( child.name === 'hand_ikR' ) OOI.rTargetBone = child;
-            if ( child.name === 'Body_9' ) OOI.RArm = child;
+            //DEF bones
+            if ( child.name === 'DEF-shoulderR' ) OOI.rCollar = child;  //548
+			if ( child.name === 'DEF-upper_armR' ) OOI.rShldrBend = child;  //560
+            if ( child.name === 'DEF-upper_armR001' ) OOI.rShldrTwist = child;  //561
+			if ( child.name === 'DEF-forearmR' ) OOI.rForearmBend = child;  //562
+			if ( child.name === 'DEF-forearmR001' ) OOI.rForearmTwist = child;  //563
+			if ( child.name === 'DEF-handR' ) OOI.rHand = child;  //564
+            if ( child.name === 'DEF-palm01R' ) OOI.rPalmIndex = child;  //580
+            if ( child.name === 'DEF-palm02R' ) OOI.rPalmMiddle = child;  //609
+            if ( child.name === 'DEF-palm03R' ) OOI.rPalmRing = child;  //628
+            if ( child.name === 'DEF-palm04R' ) OOI.rPalmPinky = child;  //647
+            if ( child.name === 'DEF-f_index01R' ) OOI.rIndex01 = child;  //572
+            if ( child.name === 'DEF-f_index02R' ) OOI.rIndex02 = child;  //573
+            if ( child.name === 'DEF-f_index03R' ) OOI.rIndex03 = child;  //574
+            if ( child.name === 'DEF-f_middle01R' ) OOI.rMiddle01 = child;  //605
+            if ( child.name === 'DEF-f_middle02R' ) OOI.rMiddle02 = child;  //606
+            if ( child.name === 'DEF-f_middle03R' ) OOI.rMiddle03 = child;  //607
+            if ( child.name === 'DEF-f_ring01R' ) OOI.rRing01 = child;  //624
+            if ( child.name === 'DEF-f_ring02R' ) OOI.rRing02 = child;  //625
+            if ( child.name === 'DEF-f_ring03R' ) OOI.rRing03 = child;  //626
+            if ( child.name === 'DEF-f_pinky01R' ) OOI.rPinky01 = child;  //643
+            if ( child.name === 'DEF-f_pinky02R' ) OOI.rPinky02 = child;  //644
+            if ( child.name === 'DEF-f_pinky03R' ) OOI.rPinky03 = child;  //645
+            if ( child.name === 'DEF-f_thumb01R' ) OOI.rThumb01 = child;  //576
+            if ( child.name === 'DEF-f_thumb02R' ) OOI.rThumb02 = child;  //577
+            if ( child.name === 'DEF-f_thumb03R' ) OOI.rThumb03 = child;  //578
+            //IK bones
+            if ( child.name === 'hand_ikR' ) OOI.rHandIK = child;  //674
+            if ( child.name === 'f_index01R001' ) OOI.rIndexIK = child;  //587
+            if ( child.name === 'f_middle01R001' ) OOI.rIK = child;  //616
+            if ( child.name === 'f_ring01R001' ) OOI.rIK = child;  //635
+            if ( child.name === 'f_pinky01R001' ) OOI.rIK = child;  //654
+            if ( child.name === 'thumb01R001' ) OOI.rIK = child;  //597
+            // Body
+            if ( child.name === 'Body_9' ) OOI.ArmR = child;
             if (child.isMesh) {
                 child.receiveShadow = true;
                 child.frustumCulled = true;
@@ -193,6 +220,8 @@ function loadModel(name) {
         });
         avatar.scale.set(100, 100, 100);
         scene.add(avatar);
+
+        OOI.rTargetBone = OOI.rIndexIK;
 
         transformControls = new TransformControls( camera, renderer.domElement );
 		transformControls.size = .5;
@@ -204,8 +233,9 @@ function loadModel(name) {
 		transformControls.addEventListener( 'mouseDown', () => OrbCtrl.enabled = false );
 		transformControls.addEventListener( 'mouseUp', () => OrbCtrl.enabled = true );
 
-        OOI.RArm.add(avatar.children[0].children[1]);
-        OOI.RArm.add(avatar.children[0].children[3]);
+        //??????????????????????????????????????????????
+        OOI.ArmR.add(avatar.children[0].children[1]);
+        OOI.ArmR.add(avatar.children[0].children[3]);
 
         const rShldrBendRotation_x = -0.32328148483753005;
         const rShldrBendRotation_y = -1.3808366951818996;
@@ -222,110 +252,73 @@ function loadModel(name) {
 
         OOI.rShldrBend.updateMatrixWorld;
         
-			const iks = [
-				{
-					target: 674, // "rTargetBone"
-					effector: 564, // "rHand"
-					links: [
+		const iksArmR = [
+			{
+				target: 674, // "rHandIK"
+				effector: 564, // "rHand"
+				links: [
+                    {
+						index: 563, // "rForearmTwist"
+                        rotationMin: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y  - ( 90 * Math.PI / 180 ), OOI.rForearmTwist.rotation._z),
+                        rotationMax: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y  + ( 80 * Math.PI / 180 ), OOI.rForearmTwist.rotation._z)
+					},
+					{
+						index: 562, // "rForearmBend"
+                        rotationMin: new THREE.Vector3(OOI.rForearmBend.rotation._x - ( 20 * Math.PI / 180 ), 0, OOI.rForearmBend.rotation._z),
+                        rotationMax: new THREE.Vector3(OOI.rForearmBend.rotation._x + ( 135 * Math.PI / 180 ), 0, OOI.rForearmBend.rotation._z)
+					},
+                    {
+						index: 561, // "rShldrTwist"
+                        rotationMin: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y - ( 95 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z),
+                        rotationMax: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y + ( 80 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z)
+					},
+                    {
+						index: 560, // "rShldrBend"
+                        rotationMin: new THREE.Euler(OOI.rShldrBend.rotation._x - ( 90 * Math.PI / 180 ), OOI.rShldrBend.rotation._y, OOI.rShldrBend.rotation._z - ( 40 * Math.PI / 180 )),
+                        rotationMax: new THREE.Euler(OOI.rShldrBend.rotation._x + ( 40 * Math.PI / 180 ), 0, OOI.rShldrBend.rotation._z  + ( 110 * Math.PI / 180 ))
+					}, 
+                ],
+            }
+        ];
+        const iksIndexR = [
+			{
+				target: 587, // rIndexIK
+				effector: 574, // rIndex03
+				links: [
+                    {
+						index: 573, // "rIndex02"
+                        //rotationMin: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y  - ( 90 * Math.PI / 180 ), OOI.rForearmTwist.rotation._z),
+                        //rotationMax: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y  + ( 80 * Math.PI / 180 ), OOI.rForearmTwist.rotation._z)
+					},
+					{
+						index: 572, // "rIndex01"
+                        //rotationMin: new THREE.Vector3(OOI.rForearmBend.rotation._x - ( 20 * Math.PI / 180 ), 0, OOI.rForearmBend.rotation._z),
+                        //rotationMax: new THREE.Vector3(OOI.rForearmBend.rotation._x + ( 135 * Math.PI / 180 ), 0, OOI.rForearmBend.rotation._z)
+					},
+                    {
+						index: 580, // "rPalmIndex"
+                        //rotationMin: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y - ( 95 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z),
+                        //rotationMax: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y + ( 80 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z)
+					},
+                    {
+						index: 564, // "rHand"
+                        //rotationMin: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y - ( 95 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z),
+                        //rotationMax: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y + ( 80 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z)
+					},
+                ],
+            }
+        ];
 
-                        /*{
-							index: 563, // "rForearmTwist"
+        /*
+		IKSolverArmR = new CCDIKSolver( OOI.ArmR, iksArmR );
+		const ccdIKHelperArmR = new CCDIKHelper( OOI.ArmR, iksArmR, 0.01 );
+		scene.add( ccdIKHelperArmR );
+*/
+        IKSolverIndexR = new CCDIKSolver( OOI.ArmR, iksIndexR );
+		const ccdIKHelperIndexR = new CCDIKHelper( OOI.ArmR, iksIndexR, 0.01 );
+		scene.add( ccdIKHelperIndexR );
 
-                            rotationMin: new THREE.Vector3( 0, -1.3963, 0 ),
-							rotationMax: new THREE.Vector3( 0, 1.5708, 0 )
-
-                            //rotationMin: new THREE.Vector3( 0, -1.25, 0 ),
-							//rotationMax: new THREE.Vector3( 0, 2.25, 0 )
-
-						},
-						{
-							index: 562, // "rForearmBend"
-
-                            rotationMin: new THREE.Vector3( -2.3562, 0, 0 ),
-							rotationMax: new THREE.Vector3( 0.3491, 0, 0 )
-
-						},
-                        {
-							index: 561, // "rShldrTwist"
-
-                            rotationMin: new THREE.Vector3( 0, -1.3963, 0 ),
-							rotationMax: new THREE.Vector3( 0, 1.6581, 0 )
-
-						},
-                        {
-							index: 560, // "rShldrBend"
-
-                            rotationMin: new THREE.Vector3( -1.5708, 0, -1.9199 ),
-							rotationMax: new THREE.Vector3( 0.6981, 0, 0.6981 )
-
-						},
-                        {
-							index: 548, // "rCollar"
-
-                            rotationMin: new THREE.Vector3( -0.9599, -0.5236, -0.4538),
-							rotationMax: new THREE.Vector3( 0.1745, 0.5236, 0.2967 )
-
-						},*/
-
-
-                        {
-							index: 563, // "rForearmTwist"
-
-                            //rotationMin: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y, OOI.rForearmTwist.rotation._z),
-                            //rotationMax: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y, OOI.rForearmTwist.rotation._z)
-
-                            rotationMin: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y  - ( 90 * Math.PI / 180 ), OOI.rForearmTwist.rotation._z),
-                            rotationMax: new THREE.Vector3(OOI.rForearmTwist.rotation._x, OOI.rForearmTwist.rotation._y  + ( 80 * Math.PI / 180 ), OOI.rForearmTwist.rotation._z)
-
-						},
-						{
-							index: 562, // "rForearmBend"
-
-                            //rotationMin: new THREE.Vector3(OOI.rForearmBend.rotation._x, OOI.rForearmBend.rotation._y, OOI.rForearmBend.rotation._z),
-                            //rotationMax: new THREE.Vector3(OOI.rForearmBend.rotation._x, OOI.rForearmBend.rotation._y, OOI.rForearmBend.rotation._z)
-
-                            rotationMin: new THREE.Vector3(OOI.rForearmBend.rotation._x - ( 20 * Math.PI / 180 ), 0, OOI.rForearmBend.rotation._z),
-                            rotationMax: new THREE.Vector3(OOI.rForearmBend.rotation._x + ( 135 * Math.PI / 180 ), 0, OOI.rForearmBend.rotation._z)
-
-						},
-                        {
-							index: 561, // "rShldrTwist"
-
-                            //rotationMin: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y, OOI.rShldrTwist.rotation._z),
-                            //rotationMax: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y, OOI.rShldrTwist.rotation._z)
-
-                            rotationMin: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y - ( 95 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z),
-                            rotationMax: new THREE.Vector3(OOI.rShldrTwist.rotation._x, OOI.rShldrTwist.rotation._y + ( 80 * Math.PI / 180 ), OOI.rShldrTwist.rotation._z)
-
-						},
-                        {
-							index: 560, // "rShldrBend"
-
-                            //rotationMin: rShldrBendVector3Min,
-                            //rotationMax: rShldrBendVector3Min
-
-                            rotationMin: new THREE.Euler(OOI.rShldrBend.rotation._x - ( 90 * Math.PI / 180 ), OOI.rShldrBend.rotation._y, OOI.rShldrBend.rotation._z - ( 40 * Math.PI / 180 )),
-                            rotationMax: new THREE.Euler(OOI.rShldrBend.rotation._x + ( 40 * Math.PI / 180 ), 0, OOI.rShldrBend.rotation._z  + ( 110 * Math.PI / 180 ))
-
-                            
-                            //rotationMin: new THREE.Vector3( -Math.PI, 0, -Math.PI),
-							//rotationMax: new THREE.Vector3( Math.PI, 0, Math.PI)
-                            
-						},
-                        //{
-						//	index: 548, // "rCollar"
-
-                        //    rotationMin: new THREE.Vector3(OOI.rCollar.rotation._x - ( 10 * Math.PI / 180 ), OOI.rCollar.rotation._y  - ( 30 * Math.PI / 180 ), OOI.rCollar.rotation._z - ( 17 * Math.PI / 180 )),
-						//	rotationMax: new THREE.Vector3(OOI.rCollar.rotation._x + ( 55 * Math.PI / 180 ), OOI.rCollar.rotation._y  + ( 30 * Math.PI / 180 ), OOI.rCollar.rotation._z + ( 26 * Math.PI / 180 ))
-
-						//},
-
-					],
-				}
-			];
-			IKSolver = new CCDIKSolver( OOI.RArm, iks );
-			const ccdikhelper = new CCDIKHelper( OOI.RArm, iks, 0.01 );
-			scene.add( ccdikhelper );
+        console.log(OOI.ArmR.skeleton);
 
         hideProgressBar();
         createPanel();
@@ -398,7 +391,12 @@ function createPanel() {
 function animate() {
     requestAnimationFrame(animate);
     camera.updateMatrixWorld();
-    IKSolver?.update();
+    //IKSolverArmR?.update();
+    IKSolverIndexR?.update();
+    //IKSolverMiddleR?.update();
+    //IKSolverRingR?.update();
+    //IKSolverPinkyR?.update();
+    //IKSolverThumbR?.update();
     renderer.render(scene, camera);
     if (typeof settings !== 'undefined') {
         settings.x = OOI.rTargetBone.position.x;
